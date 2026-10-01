@@ -17,3 +17,13 @@ Tidak ada build step dan tidak ada dependency. Buka `index.html` langsung di bro
 ```sh
 python3 -m http.server 8000
 ```
+
+## Deploy
+
+Repo ini punya workflow GitHub Pages di `.github/workflows/pages.yml`.
+
+Sekali saja, aktifkan dulu Pages-nya: **Settings → Pages → Build and deployment → Source: GitHub Actions**. `GITHUB_TOKEN` tidak punya izin membuat Pages site sendiri, jadi langkah ini tidak bisa diotomatiskan dari workflow.
+
+Setelah itu setiap push ke branch ini akan men-deploy ulang ke:
+
+<https://marselcerebrum-jpg.github.io/BMI-TES-KESEHATAN-KAI/>
