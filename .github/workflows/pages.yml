@@ -25,6 +25,9 @@ jobs:
 
       # Situs statis tanpa build step: unggah root repo apa adanya.
       - uses: actions/configure-pages@v5
+        with:
+          # Aktifkan Pages lewat API kalau belum aktif, supaya tidak perlu diatur manual.
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
