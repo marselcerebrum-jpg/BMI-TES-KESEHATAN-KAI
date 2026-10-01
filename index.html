@@ -1,0 +1,1213 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Cek Kesehatan Awal KAI</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  /* Layout: kolom input menempel di kiri pada layar lebar, readout + rencana + checklist rikkes mengalir di kanan; satu kolom di ponsel */
+  :root {
+    --bg: #eceff1;
+    --surface: #fbfcfc;
+    --surface-2: #f3f6f6;
+    --ink: #0e1416;
+    --ink-2: #4a585c;
+    --muted: #7d8b8d;
+    --rule: #d8dfe0;
+    --hair: rgba(14, 20, 22, 0.1);
+    --accent: #0c6478;
+    --accent-soft: #e2eef1;
+
+    --z-kurus: #2a78d6;
+    --z-normal: #0ca30c;
+    --z-lebih: #fab219;
+    --z-obes: #d03b3b;
+    --z-lebih-ink: #8a5e00;
+    --z-normal-ink: #006300;
+
+    --display: "Oswald", "Arial Narrow", system-ui, sans-serif;
+    --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0b0f10; --surface: #151b1d; --surface-2: #1c2426;
+      --ink: #eef3f3; --ink-2: #a9b7b8; --muted: #8a9799;
+      --rule: #2a3335; --hair: rgba(255, 255, 255, 0.11);
+      --accent: #45a9bf; --accent-soft: #113038;
+      --z-kurus: #3987e5; --z-lebih-ink: #fab219; --z-normal-ink: #0ca30c;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0b0f10; --surface: #151b1d; --surface-2: #1c2426;
+    --ink: #eef3f3; --ink-2: #a9b7b8; --muted: #8a9799;
+    --rule: #2a3335; --hair: rgba(255, 255, 255, 0.11);
+    --accent: #45a9bf; --accent-soft: #113038;
+    --z-kurus: #3987e5; --z-lebih-ink: #fab219; --z-normal-ink: #0ca30c;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: var(--body); font-size: 15px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; }
+
+  header { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+  .eyebrow {
+    font-family: var(--display); font-weight: 500; font-size: 12px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent);
+  }
+  h1 {
+    font-family: var(--display); font-weight: 600;
+    font-size: clamp(30px, 6.2vw, 44px); line-height: 1.05;
+    letter-spacing: -0.01em; margin: 0; text-wrap: balance;
+  }
+  .lede { margin: 0; max-width: 64ch; color: var(--ink-2); }
+
+  .banner {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px;
+    background: var(--accent-soft); border: 1px solid var(--hair);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 10px 10px 0; padding: 11px 14px;
+    font-size: 13.5px; margin-bottom: 22px;
+  }
+  .banner strong { font-weight: 600; }
+  .banner span { color: var(--ink-2); }
+
+  .grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
+  @media (min-width: 880px) { .grid { grid-template-columns: 350px 1fr; align-items: start; } }
+
+  .panel {
+    background: var(--surface); border: 1px solid var(--hair);
+    border-radius: 14px; padding: 20px; min-width: 0;
+  }
+  .panel + .panel { margin-top: 16px; }
+  .panel-title {
+    font-family: var(--display); font-weight: 500; font-size: 12px;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+    margin: 0 0 16px;
+  }
+  .panel-title .count { color: var(--accent); font-family: var(--mono); letter-spacing: 0; }
+
+  .field { display: flex; flex-direction: column; gap: 8px; }
+  .field + .field { margin-top: 20px; }
+  .field > label, .leg { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+  fieldset { border: 0; margin: 0; padding: 0; }
+
+  .seg { display: flex; gap: 2px; background: var(--surface-2); border: 1px solid var(--hair); border-radius: 10px; padding: 3px; }
+  .seg label { flex: 1; position: relative; }
+  .seg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .seg span {
+    display: block; text-align: center; padding: 8px 4px; border-radius: 7px;
+    font-size: 14px; font-weight: 500; color: var(--ink-2); cursor: pointer;
+    transition: background 0.14s ease, color 0.14s ease;
+  }
+  .seg input:checked + span { background: var(--accent); color: #fff; }
+  .seg input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .numrow { display: flex; align-items: baseline; gap: 8px; }
+  input[type="number"] {
+    font-family: var(--mono); font-size: 24px; font-weight: 500;
+    width: 100%; max-width: 130px; padding: 8px 10px;
+    color: var(--ink); background: var(--surface-2);
+    border: 1px solid var(--rule); border-radius: 9px;
+  }
+  input[type="number"].sm { font-size: 18px; max-width: 94px; }
+  input[type="number"]:focus-visible, input[type="date"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  input[type="date"] {
+    font-family: var(--mono); font-size: 14px; width: 100%; padding: 9px 10px;
+    color: var(--ink); background: var(--surface-2);
+    border: 1px solid var(--rule); border-radius: 9px;
+  }
+  .unit { font-size: 14px; color: var(--muted); font-weight: 500; }
+  input[type="range"] { width: 100%; accent-color: var(--accent); margin: 2px 0 0; }
+  select {
+    width: 100%; font-family: var(--body); font-size: 14px; padding: 10px;
+    color: var(--ink); background: var(--surface-2);
+    border: 1px solid var(--rule); border-radius: 9px;
+  }
+  select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .hint { font-size: 12.5px; color: var(--muted); margin: 0; }
+
+  .readout { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 20px; }
+  .bignum { font-size: clamp(54px, 13vw, 76px); font-weight: 700; line-height: 0.92; letter-spacing: -0.03em; }
+  .bignum-cap {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 4px;
+  }
+  .std { font-size: 12.5px; color: var(--muted); margin: 10px 0 0; }
+  .std b { color: var(--ink-2); font-weight: 600; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 6px 12px 6px 10px; border-radius: 999px;
+    font-size: 13.5px; font-weight: 600;
+    background: var(--surface-2); border: 1px solid var(--hair); margin-bottom: 6px;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+  .ico { display: inline-flex; align-items: center; flex: none; }
+  .chip svg { flex: none; }
+
+  .gauge { margin-top: 22px; }
+  .bands { display: flex; height: 16px; position: relative; }
+  .band { position: relative; border-right: 2px solid var(--surface); }
+  .band:last-child { border-right: 0; }
+  .band:first-child { border-radius: 4px 0 0 4px; }
+  .band:last-child { border-radius: 0 4px 4px 0; }
+  .band .split { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--surface); }
+  .needle-track { position: relative; height: 26px; margin-bottom: 4px; }
+  .needle {
+    position: absolute; bottom: 0; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center;
+    transition: left 0.18s ease;
+  }
+  .needle b {
+    font-family: var(--mono); font-size: 12px; font-weight: 500;
+    color: var(--ink); background: var(--surface); padding: 0 3px; white-space: nowrap;
+  }
+  .needle i { display: block; width: 2px; height: 9px; background: var(--ink); }
+  .ticks { position: relative; height: 32px; margin-top: 7px; }
+  .tick {
+    position: absolute; top: 0; font-family: var(--mono); font-size: 11.5px;
+    font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap;
+  }
+  .tick::before { content: ""; position: absolute; top: -7px; left: 50%; width: 1px; height: 5px; background: var(--rule); }
+  .tick.mid { transform: translateX(-50%); }
+  .tick.start { left: 0; }
+  .tick.start::before { left: 0; }
+  .tick.end { right: 0; }
+  .tick.end::before { left: auto; right: 0; }
+  .zonelabels { display: flex; margin-top: 2px; }
+  .zl { font-size: 11px; line-height: 1.25; color: var(--ink-2); font-weight: 500; padding-right: 4px; min-width: 0; }
+
+  .stats { display: grid; gap: 1px; background: var(--rule); border-radius: 11px; overflow: hidden; margin-top: 24px; }
+  @media (min-width: 620px) { .stats { grid-template-columns: repeat(3, 1fr); } }
+  .stat { background: var(--surface); padding: 14px 16px; min-width: 0; }
+  .stat dt { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); margin: 0 0 5px; }
+  .stat dd { margin: 0; font-family: var(--mono); font-size: 19px; font-weight: 500; letter-spacing: -0.01em; }
+  .stat dd small { display: block; font-family: var(--body); font-size: 12.5px; font-weight: 400; color: var(--ink-2); letter-spacing: 0; margin-top: 3px; line-height: 1.4; }
+
+  /* tiga pembacaan */
+  .reads { display: grid; gap: 1px; background: var(--rule); border-radius: 11px; overflow: hidden; margin-top: 18px; }
+  @media (min-width: 620px) { .reads { grid-template-columns: repeat(3, 1fr); } }
+  .read { background: var(--surface); padding: 12px 14px; min-width: 0; }
+  .read.on { background: var(--accent-soft); }
+  .read .rh { font-size: 11.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+  .read.on .rh { color: var(--accent); }
+  .read .rk { font-size: 14.5px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .read .rr { font-family: var(--mono); font-size: 12px; color: var(--ink-2); margin-top: 3px; display: block; }
+  .read.off .rk, .read.off .rr { color: var(--muted); font-weight: 400; }
+
+  /* rencana */
+  .plan-head { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin-bottom: 14px; }
+  .plan-head h3 { font-family: var(--display); font-weight: 500; font-size: 19px; margin: 0; }
+  .rows { display: grid; gap: 1px; background: var(--rule); border-radius: 11px; overflow: hidden; margin-bottom: 16px; }
+  @media (min-width: 620px) { .rows { grid-template-columns: repeat(3, 1fr); } }
+  .row { background: var(--surface); padding: 13px 15px; min-width: 0; }
+  .row dt { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); margin: 0 0 4px; }
+  .row dd { margin: 0; font-family: var(--mono); font-size: 17px; font-weight: 500; }
+  .row dd small { display: block; font-family: var(--body); font-size: 12.5px; font-weight: 400; color: var(--ink-2); margin-top: 3px; line-height: 1.4; }
+  .steps { list-style: none; margin: 0 0 14px; padding: 0; counter-reset: s; }
+  .steps li { position: relative; padding: 0 0 0 30px; margin-bottom: 11px; font-size: 14px; counter-increment: s; }
+  .steps li:last-child { margin-bottom: 0; }
+  .steps li::before {
+    content: counter(s); position: absolute; left: 0; top: 1px;
+    width: 20px; height: 20px; border-radius: 6px;
+    background: var(--accent-soft); color: var(--accent);
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .warn {
+    border-left: 3px solid var(--z-obes); background: var(--surface-2);
+    border-radius: 0 9px 9px 0; padding: 12px 14px; font-size: 13.5px; color: var(--ink-2);
+  }
+  .warn strong { color: var(--ink); font-weight: 600; }
+  .warn + .note { margin-top: 12px; }
+
+  .verdict { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; margin-bottom: 12px; }
+  .verdict-h { font-family: var(--display); font-weight: 500; font-size: 19px; margin: 0; }
+  .measure { font-family: var(--mono); font-size: 14px; font-variant-numeric: tabular-nums; color: var(--ink-2); margin: 0 0 12px; }
+  .measure b { color: var(--ink); font-weight: 500; }
+  .note { font-size: 13.5px; color: var(--ink-2); margin: 0; border-left: 2px solid var(--rule); padding-left: 12px; }
+  .note + .note { margin-top: 10px; }
+
+  .meter { height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; margin: 0 0 4px; }
+  .meter i { display: block; height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.2s ease; }
+  .meter-cap { font-size: 12.5px; color: var(--ink-2); margin: 0 0 18px; }
+  .checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; background: var(--rule); border-radius: 11px; overflow: hidden; }
+  .checks li { background: var(--surface); }
+  .checks label { display: flex; gap: 12px; padding: 13px 15px; cursor: pointer; align-items: flex-start; }
+  .checks input { margin: 3px 0 0; width: 17px; height: 17px; accent-color: var(--accent); flex: none; }
+  .checks input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .ck-body { min-width: 0; }
+  .ck-h { display: block; font-weight: 600; font-size: 14px; }
+  .ck-h em { font-style: normal; font-family: var(--mono); font-size: 11.5px; color: var(--muted); font-weight: 500; margin-right: 7px; }
+  .ck-what { display: block; font-size: 13px; color: var(--ink-2); margin-top: 2px; }
+  .ck-prep { display: block; font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .ck-prep b { color: var(--ink-2); font-weight: 600; }
+  .checks input:checked ~ .ck-body .ck-h { color: var(--muted); text-decoration: line-through; text-decoration-thickness: 1px; }
+
+  .simple { list-style: none; margin: 0; padding: 0; }
+  .simple li { padding: 9px 0; border-bottom: 1px solid var(--rule); font-size: 14px; }
+  .simple li:last-child { border-bottom: 0; }
+  .simple b { font-weight: 600; }
+  .simple span { color: var(--ink-2); }
+
+  .tl { list-style: none; margin: 0; padding: 0; }
+  .tl li { display: grid; grid-template-columns: 1fr auto; gap: 4px 14px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+  .tl li:last-child { border-bottom: 0; }
+  .tl .st { font-weight: 600; font-size: 14px; }
+  .tl .dt { font-family: var(--mono); font-size: 12.5px; font-variant-numeric: tabular-nums; color: var(--ink-2); text-align: right; white-space: nowrap; }
+  .tl .tag { grid-column: 1 / -1; display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+  .tl li.done .st { color: var(--muted); }
+  .tl li.now { background: var(--accent-soft); margin-inline: -10px; padding-inline: 10px; border-radius: 8px; border-bottom-color: transparent; }
+
+  .tablewrap { overflow-x: auto; margin-top: 4px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; min-width: 440px; }
+  th, td { text-align: left; padding: 9px 12px 9px 0; border-bottom: 1px solid var(--rule); }
+  th { font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  td.num, th.num { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; padding-right: 16px; }
+  tr.active td { background: var(--accent-soft); font-weight: 600; }
+  tr.active td:first-child { box-shadow: inset 3px 0 0 var(--accent); padding-left: 10px; }
+  .zcell { display: inline-flex; align-items: center; gap: 8px; }
+
+  details { margin-top: 16px; }
+  summary { cursor: pointer; font-weight: 600; font-size: 14px; color: var(--accent); padding: 4px 0; }
+  summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+  footer { margin-top: 32px; font-size: 12.5px; color: var(--muted); }
+  footer p { margin: 0 0 8px; max-width: 74ch; }
+  footer a { color: var(--accent); }
+  .srcs { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Rekrutmen KAI Group 2026</span>
+    <h1>Cek Kesehatan Awal KAI</h1>
+    <p class="lede">Hitung BMI dengan ambang yang sesuai usia, cek tinggi badan terhadap syarat formasi KAI, dan susun rencana sampai hari tes. Angka awal di bawah hanya contoh — ganti dengan ukuran kamu sendiri.</p>
+  </header>
+
+  <p class="banner" id="banner">
+    <strong id="banner-h">Seleksi kesehatan awal</strong>
+    <span id="banner-b">Memuat jadwal…</span>
+  </p>
+
+  <div class="grid">
+    <!-- INPUT -->
+    <section class="panel" aria-labelledby="t-ukur">
+      <h2 class="panel-title" id="t-ukur">Ukuran kamu</h2>
+
+      <fieldset class="field">
+        <legend class="leg">Jenis kelamin</legend>
+        <div class="seg">
+          <label><input type="radio" name="sex" id="sex-p" value="p" checked><span>Pria</span></label>
+          <label><input type="radio" name="sex" id="sex-w" value="w"><span>Wanita</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend class="leg">Standar yang dipakai</legend>
+        <div class="seg">
+          <label><input type="radio" name="std" id="std-who" value="who" checked><span>WHO</span></label>
+          <label><input type="radio" name="std" id="std-kemenkes" value="kemenkes"><span>Kemenkes</span></label>
+          <label><input type="radio" name="std" id="std-imtu" value="imtu"><span>IMT/U</span></label>
+        </div>
+        <p class="hint">WHO dewasa: normal 18,5–24,9 — yang paling sering dipakai pemeriksaan kesehatan kerja. Kemenkes Asia-Pasifik: normal 18,5–22,9, lebih ketat. IMT/U: menurut usia dan jenis kelamin, berlaku di bawah 19 tahun.</p>
+      </fieldset>
+
+      <div class="field">
+        <label for="usia">Usia</label>
+        <div class="numrow">
+          <input type="number" class="sm" id="usia" min="15" max="60" step="1" value="18" inputmode="numeric">
+          <span class="unit">tahun</span>
+        </div>
+        <p class="hint">Di bawah 19 tahun, BMI dibaca pakai ambang IMT/U yang berbeda tiap usia dan jenis kelamin. 19 tahun ke atas pakai ambang dewasa.</p>
+      </div>
+
+      <div class="field">
+        <label for="tinggi">Tinggi badan</label>
+        <div class="numrow">
+          <input type="number" id="tinggi" min="120" max="220" step="0.5" value="168" inputmode="decimal">
+          <span class="unit">cm</span>
+        </div>
+        <input type="range" id="tinggi-r" min="130" max="210" step="0.5" value="168" aria-label="Geser tinggi badan">
+      </div>
+
+      <div class="field">
+        <label for="berat">Berat badan</label>
+        <div class="numrow">
+          <input type="number" id="berat" min="25" max="200" step="0.1" value="74" inputmode="decimal">
+          <span class="unit">kg</span>
+        </div>
+        <input type="range" id="berat-r" min="35" max="150" step="0.5" value="74" aria-label="Geser berat badan">
+      </div>
+
+      <div class="field">
+        <label for="formasi">Formasi KAI yang dilamar</label>
+        <select id="formasi"></select>
+        <p class="hint">Dipakai untuk mengecek tinggi badan minimal. Tidak mengubah perhitungan BMI.</p>
+      </div>
+
+      <div class="field">
+        <label for="tgl">Tanggal tes kesehatan kamu</label>
+        <input type="date" id="tgl" value="2026-10-02">
+        <p class="hint">Isi tanggal dari undangan tes kalau sudah ada. Nilai awal memakai estimasi awal jendela kesehatan awal.</p>
+      </div>
+    </section>
+
+    <div style="min-width:0">
+      <!-- HASIL -->
+      <section class="panel" aria-labelledby="t-hasil">
+        <h2 class="panel-title" id="t-hasil">Hasil hitung</h2>
+
+        <div class="readout" aria-live="polite">
+          <div>
+            <span class="bignum-cap">BMI / IMT</span>
+            <span class="bignum" id="out-bmi">—</span>
+          </div>
+          <span class="chip" id="out-chip">
+            <span class="ico" id="out-ico"></span>
+            <span id="out-kat">—</span>
+          </span>
+        </div>
+        <p class="std" id="out-std">—</p>
+
+        <div class="reads" id="out-reads"></div>
+
+        <div class="gauge">
+          <div class="needle-track">
+            <div class="needle" id="needle" style="left:50%">
+              <b id="needle-val">—</b>
+              <i></i>
+            </div>
+          </div>
+          <div class="bands" id="bands" role="img" aria-label="Skala BMI dengan zona kurus, normal, berlebih, dan obesitas"></div>
+          <div class="ticks" id="ticks"></div>
+          <div class="zonelabels" id="zonelabels" aria-hidden="true"></div>
+        </div>
+
+        <dl class="stats">
+          <div class="stat">
+            <dt>Berat ideal</dt>
+            <dd id="out-ideal">—</dd>
+          </div>
+          <div class="stat">
+            <dt>Selisih</dt>
+            <dd id="out-selisih">—</dd>
+          </div>
+          <div class="stat">
+            <dt>Tinggi badan</dt>
+            <dd id="out-tinggi">—</dd>
+          </div>
+        </dl>
+      </section>
+
+      <!-- RENCANA -->
+      <section class="panel" aria-labelledby="t-plan">
+        <h2 class="panel-title" id="t-plan">Rencana sampai hari tes</h2>
+        <div class="plan-head" aria-live="polite">
+          <h3 id="plan-h">—</h3>
+          <span class="chip" id="plan-chip">
+            <span class="ico" id="plan-ico"></span>
+            <span id="plan-status">—</span>
+          </span>
+        </div>
+        <dl class="rows">
+          <div class="row"><dt>Berat sasaran</dt><dd id="plan-target">—</dd></div>
+          <div class="row"><dt>Waktu tersisa</dt><dd id="plan-waktu">—</dd></div>
+          <div class="row"><dt>Laju yang dibutuhkan</dt><dd id="plan-laju">—</dd></div>
+        </dl>
+        <ol class="steps" id="plan-steps"></ol>
+        <div class="warn" id="plan-warn" hidden></div>
+        <p class="note" id="plan-note">Kalau kamu punya kondisi medis, sedang minum obat, atau selisihnya besar, bicarakan dulu dengan dokter atau ahli gizi sebelum mengubah pola makan secara drastis.</p>
+      </section>
+
+      <!-- SYARAT FORMASI -->
+      <section class="panel" aria-labelledby="t-syarat">
+        <h2 class="panel-title" id="t-syarat">Syarat formasi</h2>
+        <div class="verdict" aria-live="polite">
+          <h3 class="verdict-h" id="out-formasi">—</h3>
+          <span class="chip" id="out-tchip">
+            <span class="ico" id="out-tico"></span>
+            <span id="out-tstatus">—</span>
+          </span>
+        </div>
+        <p class="measure" id="out-tmeasure">—</p>
+        <p class="note" id="out-tnote"></p>
+        <p class="note">Soal berat badan, pengumuman KAI hanya menulis <strong>&ldquo;memiliki tinggi badan dan berat badan ideal sesuai formasi&rdquo;</strong> tanpa angka. Rentang 18,5–24,9 adalah klasifikasi WHO untuk orang dewasa, bukan ambang kelulusan yang diterbitkan KAI — dan BMI di luar rentang itu tidak otomatis menggugurkan, karena rikkes dinilai sebagai satu kesatuan oleh tim medis. Pakai zona di atas sebagai target latihan, bukan sebagai putusan.</p>
+      </section>
+
+      <!-- CHECKLIST RIKKES -->
+      <section class="panel" aria-labelledby="t-rikkes">
+        <h2 class="panel-title" id="t-rikkes">Sepuluh komponen kesehatan awal <span class="count" id="ck-count">0/10</span></h2>
+        <div class="meter" role="img" aria-label="Kemajuan persiapan"><i id="ck-bar" style="width:0%"></i></div>
+        <p class="meter-cap" id="ck-cap">Centang yang sudah kamu siapkan atau periksa sendiri. Tersimpan di browser ini.</p>
+        <ul class="checks" id="ck-list"></ul>
+      </section>
+
+      <!-- KESEHATAN AKHIR -->
+      <section class="panel" aria-labelledby="t-akhir">
+        <h2 class="panel-title" id="t-akhir">Kesehatan akhir — tahap setelah wawancara</h2>
+        <ul class="simple">
+          <li><b>Pemeriksaan fisik lengkap</b> <span>— ulangan yang lebih menyeluruh dari kesehatan awal.</span></li>
+          <li><b>Evaluasi psikologi</b> <span>— penilaian kepribadian dan kondisi mental, terpisah dari psikotes seleksi.</span></li>
+          <li><b>Tes narkoba</b> <span>— pemeriksaan urine. Hasil positif menggugurkan.</span></li>
+          <li><b>Pemeriksaan HIV/AIDS</b> <span>— bagian dari pemeriksaan laboratorium tahap akhir.</span></li>
+          <li><b>Kesamaptaan</b> <span>— tes ketahanan fisik, khusus formasi POLSUSKA.</span></li>
+        </ul>
+        <p class="note" style="margin-top:14px">Tahap ini baru dijalani pelamar yang lolos wawancara. Rangkaian resmi KAI Group 2026 ada tujuh tahap, dengan wawancara dan kesehatan akhir sebagai dua tahap tersendiri.</p>
+      </section>
+
+      <!-- TIMELINE -->
+      <section class="panel" aria-labelledby="t-tl">
+        <h2 class="panel-title" id="t-tl">Tahapan rekrutmen 2026</h2>
+        <ul class="tl" id="tl-list"></ul>
+        <p class="hint" style="margin-top:12px">Tanggal registrasi dan apply diambil dari poster resmi KAI Group. Tanggal tahap setelahnya adalah estimasi dari jarak antar tahap gelombang 2024 dan 2025, bukan pengumuman resmi — cocokkan dengan karier.kai.id.</p>
+      </section>
+
+      <!-- TABEL -->
+      <section class="panel" aria-labelledby="t-klas">
+        <h2 class="panel-title" id="t-klas">Ambang yang sedang dipakai</h2>
+        <div class="tablewrap">
+          <table>
+            <thead>
+              <tr><th>Kategori</th><th class="num" id="th-rentang">Rentang BMI</th><th class="num">Berat pada tinggi kamu</th></tr>
+            </thead>
+            <tbody id="tbl-klas"></tbody>
+          </table>
+        </div>
+        <p class="hint" id="klas-note" style="margin-top:12px">—</p>
+
+        <details>
+          <summary>Ambang IMT/U usia 15–18 tahun (WHO 2007)</summary>
+          <div class="tablewrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Usia</th><th class="num">−3 SD</th><th class="num">−2 SD</th><th class="num">+1 SD</th><th class="num">+2 SD</th></tr></thead>
+              <tbody id="tbl-who"></tbody>
+            </table>
+          </div>
+          <p class="hint" style="margin-top:10px">Pada usia 19 tahun, +1 SD jatuh di BMI 25,4 (laki-laki) dan 25,0 (perempuan) — hampir sama dengan ambang dewasa 25. Kurva WHO memang dirancang menyambung ke ambang dewasa di usia itu.</p>
+        </details>
+
+        <details>
+          <summary>Tinggi badan minimal semua formasi KAI</summary>
+          <div class="tablewrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Formasi</th><th class="num">Pria</th><th class="num">Wanita</th></tr></thead>
+              <tbody id="tbl-formasi"></tbody>
+            </table>
+          </div>
+        </details>
+
+        <details>
+          <summary>Pembanding: tinggi minimal Polri, TNI, dan sekolah kedinasan</summary>
+          <div class="tablewrap" style="margin-top:12px">
+            <table>
+              <thead><tr><th>Jalur</th><th class="num">Pria</th><th class="num">Wanita</th></tr></thead>
+              <tbody id="tbl-lain"></tbody>
+            </table>
+          </div>
+        </details>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    <p><strong>Soal angka BMI yang beredar sebagai &ldquo;syarat KAI&rdquo;.</strong> Tabel yang menyebut BMI 18,5–24,9 sebagai batas lolos dan di luar itu &ldquo;gugur&rdquo; tidak berasal dari pengumuman resmi KAI. Rentang itu benar sebagai klasifikasi WHO untuk orang dewasa, dan wajar dipakai sebagai target, tapi KAI tidak pernah menerbitkannya sebagai ambang kelulusan — dan satu angka BMI di luar rentang tidak otomatis menggugurkan, karena rikkes dinilai sebagai satu kesatuan. Memberi tahu siswa bahwa mereka &ldquo;gugur&rdquo; karena BMI 25 berisiko membuat mereka batal mendaftar atau menempuh diet ekstrem tanpa alasan.</p>
+    <p><strong>Yang tidak bisa dijawab halaman ini.</strong> BMI tidak membedakan otot dan lemak, jadi pelamar yang rutin latihan beban sering terbaca &ldquo;berlebih&rdquo; padahal komposisi tubuhnya bagus. Sebagian besar komponen rikkes KAI juga tidak bisa dilatih dalam seminggu — buta warna dan ketajaman penglihatan termasuk yang tidak bisa diubah sama sekali, jadi periksa itu sebelum memilih formasi, bukan sesudah lolos administrasi. Rencana berat badan di halaman ini memakai laju yang aman; untuk kondisi yang kamu ragukan, pemeriksaan di klinik atau puskesmas jauh lebih berguna daripada menebak dari kalkulator.</p>
+    <p class="srcs">
+      <span>Sumber:</span>
+      <a href="https://kesprimkom.kemkes.go.id/assets/uploads/contents/others/2020permenkes02.pdf">Permenkes No. 2/2020 — Standar Antropometri Anak</a>
+      <a href="https://www.who.int/tools/growth-reference-data-for-5to19-years/indicators/bmi-for-age">WHO BMI-for-age 5–19 tahun</a>
+      <a href="https://jadibumn.id/tes-kesehatan-awal-kai-meliputi/">Komponen tes kesehatan awal KAI</a>
+      <a href="https://kumparan.com/berita-terkini/apa-saja-tes-kesehatan-kai-2025-inilah-tahapannya-25tAOrZtTrj">Tahapan tes kesehatan KAI</a>
+      <a href="https://blog.itera.ac.id/syarat-rekrutmen-kai-group-2026-usia-pendidikan-tinggi-badan-dan-dokumen/">Syarat rekrutmen KAI Group 2026</a>
+    </p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var SCALE_MIN = 12;
+  var SCALE_MAX = 36;
+
+  // WHO 2007 BMI-for-age (z-score), usia 15–18 tahun
+  var WHO = {
+    p: {
+      15: { m3: 14.7, m2: 16.0, p1: 22.7, p2: 27.0 },
+      16: { m3: 15.1, m2: 16.5, p1: 23.5, p2: 27.9 },
+      17: { m3: 15.4, m2: 16.9, p1: 24.3, p2: 28.6 },
+      18: { m3: 15.7, m2: 17.3, p1: 24.9, p2: 29.2 }
+    },
+    w: {
+      15: { m3: 14.4, m2: 15.9, p1: 23.5, p2: 28.2 },
+      16: { m3: 14.6, m2: 16.2, p1: 24.1, p2: 28.9 },
+      17: { m3: 14.7, m2: 16.4, p1: 24.5, p2: 29.3 },
+      18: { m3: 14.7, m2: 16.4, p1: 24.8, p2: 29.5 }
+    }
+  };
+
+  var FORMASI = [
+    { g: "Tinggi minimal 163 cm", items: [
+      { id: "d3-kondektur",   nama: "D3 Kondektur", p: 163, w: null },
+      { id: "d3-operasional", nama: "D3 Operasional — Masinis & Asisten PPKA", p: 163, w: null, note: "Formasi dengan syarat tinggi tertinggi di rekrutmen ini, bersama Kondektur." },
+      { id: "slta-kondektur", nama: "SLTA Kondektur", p: 163, w: null, note: "Jenjang SLTA baru dibuka lagi di gelombang 2026 — gelombang 2025 hanya D3 dan D4/S1." }
+    ]},
+    { g: "Tinggi minimal 160 cm", items: [
+      { id: "slta-masinis", nama: "SLTA Masinis", p: 160, w: null, note: "Jenjang SLTA baru dibuka lagi di gelombang 2026." },
+      { id: "d3-admin",     nama: "D3 Administrasi", p: 160, w: null },
+      { id: "d3-paramedis", nama: "D3 Paramedis", p: 160, w: null },
+      { id: "d3-kpjr",      nama: "D3 Operator KPJR", p: 160, w: null },
+      { id: "s1-umum",      nama: "D4/S1 — formasi umum", p: 160, w: null },
+      { id: "s1-legal",     nama: "D4/S1 Administrasi Legal", p: 160, w: 155, note: "Satu-satunya formasi yang mencantumkan tinggi minimal wanita di pengumuman resmi." }
+    ]}
+  ];
+
+  var LAIN = [
+    { g: "Polri 2026", items: [
+      ["Akpol", 165, 163], ["Bintara PTU", 165, 160], ["Tamtama (Brimob/Polair)", 165, null],
+      ["SIPSS (sarjana)", 162, 157], ["Afirmasi pesisir", 163, 158], ["Afirmasi pegunungan", 160, 155]
+    ]},
+    { g: "TNI", items: [
+      ["Akmil", 163, 163], ["TNI AD Bintara/Tamtama PK (aturan baru)", 158, 155],
+      ["TNI AD standar reguler", 163, 157], ["TNI AL Bintara PK", 163, 157], ["TNI AU jalur umum", 163, 157]
+    ]},
+    { g: "Sekolah Kedinasan 2026", items: [
+      ["Poltekim / Poltekip", 168, 160], ["STIN", 165, 160], ["Kemenhub penerbangan", 165, 160],
+      ["Poltekpin", 162, 155], ["IPDN", 160, 155], ["Poltek SSN", 160, 150],
+      ["Kemenhub umum", 160, 155], ["STMKG", 155, 150], ["PKN STAN / STIS", null, null]
+    ]}
+  ];
+
+  var CHECKS = [
+    { id: "antro", nama: "Antropometri",
+      what: "Tinggi badan, berat badan, BMI, dan lingkar dada.",
+      prep: "Satu-satunya komponen yang bisa kamu perbaiki sendiri sebelum hari-H — pakai rencana di atas sebagai target." },
+    { id: "vital", nama: "Tekanan darah & vital sign",
+      what: "Tekanan darah, denyut nadi, suhu tubuh, dan laju pernapasan.",
+      prep: "Tidur cukup, kurangi kafein dan garam dua hari sebelumnya. Datang lebih awal supaya tidak terukur saat masih terengah-engah." },
+    { id: "mata", nama: "Mata — Ishihara & Snellen",
+      what: "Tes Ishihara untuk buta warna, Snellen chart untuk ketajaman penglihatan.",
+      prep: "Tidak bisa dilatih. Periksa buta warna di klinik sebelum memilih formasi; kalau pakai kacamata, bawa resep terbaru." },
+    { id: "thtt", nama: "Pendengaran — audiometri",
+      what: "Kemampuan mendengar diukur pada beberapa frekuensi.",
+      prep: "Bersihkan telinga ke tenaga medis, bukan sendiri dengan cotton bud. Kotoran yang menumpuk bisa membuat hasil terbaca buruk." },
+    { id: "gigi", nama: "Gigi & mulut",
+      what: "Kondisi gigi, gusi, dan rongga mulut.",
+      prep: "Gigi berlubang dan karang gigi adalah temuan paling sering. Ini bisa dibereskan beberapa hari sebelum tes." },
+    { id: "jantung", nama: "Jantung — EKG",
+      what: "Elektrokardiogram untuk merekam aktivitas listrik jantung.",
+      prep: "Hindari olahraga berat dan kafein pada hari tes. Sebutkan ke petugas kalau kamu sedang minum obat apa pun." },
+    { id: "paru", nama: "Paru — rontgen dada",
+      what: "Foto toraks untuk memeriksa paru-paru dan ukuran jantung.",
+      prep: "Lepas semua logam dari badan. Kalau pernah dirawat karena TB atau penyakit paru, siapkan surat keterangan sembuh." },
+    { id: "lab-darah", nama: "Laboratorium darah",
+      what: "Darah lengkap, gula darah, fungsi hati, dan fungsi ginjal.",
+      prep: "Biasanya perlu puasa 8–10 jam; tanya aturan puasanya saat undangan tes. Minum air putih tetap boleh." },
+    { id: "lab-urine", nama: "Laboratorium urine",
+      what: "Pemeriksaan sampel urine untuk kelainan ginjal dan saluran kemih.",
+      prep: "Minum air putih cukup sejak sehari sebelumnya. Hindari suplemen dosis tinggi yang bisa mengacaukan hasil." },
+    { id: "neuro", nama: "Neurologis",
+      what: "Refleks, koordinasi gerak, dan kekuatan otot.",
+      prep: "Tidak ada persiapan khusus. Laporkan riwayat cedera kepala, kejang, atau operasi saraf kalau ada." }
+  ];
+
+  var TAHAP = [
+    { nama: "Registrasi akun di karier.kai.id", start: "2026-09-04", end: "2026-09-04", label: "4 Sep 2026" },
+    { nama: "Apply lamaran", start: "2026-09-07", end: "2026-09-10", label: "7 – 10 Sep 2026" },
+    { nama: "Seleksi administrasi", start: "2026-09-26", end: "2026-09-27", label: "≈ 26 – 27 Sep 2026" },
+    { nama: "Seleksi kesehatan awal", start: "2026-10-02", end: "2026-10-17", label: "≈ 2 – 17 Okt 2026" },
+    { nama: "Seleksi psikologi", start: "2026-10-25", end: "2026-10-27", label: "≈ 25 – 27 Okt 2026" },
+    { nama: "Seleksi wawancara", start: null, end: null, label: "≈ Nov 2026" },
+    { nama: "Seleksi kesehatan akhir", start: null, end: null, label: "≈ Nov – Des 2026" },
+    { nama: "Pengumuman hasil", start: null, end: null, label: "≈ Des 2026" }
+  ];
+
+  var ICONS = {
+    check: '<svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.6l3.2 3.2L13 5" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    up:    '<svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13V3.6M8 3l4 4M8 3L4 7" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    down:  '<svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v9.4M8 13l4-4M8 13l-4-4" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    x:     '<svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M4.4 4.4l7.2 7.2M11.6 4.4l-7.2 7.2" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg>',
+    info:  '<svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.9"/><path d="M8 7.2v4M8 4.9v.9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>'
+  };
+
+  var ALL = {};
+  FORMASI.forEach(function (g) { g.items.forEach(function (it) { ALL[it.id] = it; }); });
+
+  var $ = function (id) { return document.getElementById(id); };
+  var STORE = "kai-rikkes-v3";
+  var DEF_FORMASI = "d3-kondektur";
+  var DEF_TGL = "2026-10-02";
+
+  function fmt(n, d) {
+    if (d === undefined) { d = 1; }
+    return n.toFixed(d).replace(".", ",");
+  }
+  function cm(n) { return fmt(n, n % 1 ? 1 : 0); }
+  function clamp(v, lo, hi) { return Math.min(hi, Math.max(lo, v)); }
+  function pos(v) { return clamp(((v - SCALE_MIN) / (SCALE_MAX - SCALE_MIN)) * 100, 0, 100); }
+
+  var state = { sex: "p", usia: 18, t: 168, b: 74, std: "who", formasi: DEF_FORMASI, tgl: DEF_TGL, ck: {} };
+
+  function save() {
+    try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) { /* storage boleh gagal */ }
+  }
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORE);
+      if (!raw) { return; }
+      var s = JSON.parse(raw);
+      if (!s || typeof s !== "object") { return; }
+      if (s.sex === "w" || s.sex === "p") { state.sex = s.sex; }
+      if (typeof s.usia === "number" && s.usia >= 15 && s.usia <= 60) { state.usia = s.usia; }
+      if (typeof s.t === "number" && s.t > 0) { state.t = s.t; }
+      if (typeof s.b === "number" && s.b > 0) { state.b = s.b; }
+      if (s.std === "who" || s.std === "kemenkes" || s.std === "imtu") { state.std = s.std; }
+      if (s.formasi && ALL[s.formasi]) { state.formasi = s.formasi; }
+      if (typeof s.tgl === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s.tgl)) { state.tgl = s.tgl; }
+      if (s.ck && typeof s.ck === "object") { state.ck = s.ck; }
+    } catch (e) { /* abaikan */ }
+  }
+
+  // ---------- ambang ----------
+  var STD_NAMA = { who: "WHO dewasa", kemenkes: "Kemenkes Asia-Pasifik", imtu: "IMT/U menurut usia" };
+
+  function stdDef(key) {
+    if (key === "who") {
+      return {
+        key: "who",
+        judul: "Klasifikasi WHO untuk orang dewasa",
+        sumber: "Normal 18,5–24,9. Ini klasifikasi WHO, bukan ambang kelulusan yang diterbitkan KAI — pemeriksaan kesehatan kerja umumnya memakai rentang ini, tapi KAI sendiri hanya menulis “berat badan ideal” tanpa angka.",
+        kolom: "Rentang BMI (WHO)",
+        cuts: [18.5, 25, 30],
+        split: { band: 3, at: 35 },
+        zlabels: ["Kurus", "Normal", "Berlebih", "Obesitas"],
+        kat: [
+          { at: 18.5, nama: "Kurus", rentang: "< 18,5", token: "--z-kurus", ink: "--z-kurus", icon: "down" },
+          { at: 25,   nama: "Normal", rentang: "18,5 – 24,9", token: "--z-normal", ink: "--z-normal-ink", icon: "check" },
+          { at: 30,   nama: "Berat badan berlebih", rentang: "25,0 – 29,9", token: "--z-lebih", ink: "--z-lebih-ink", icon: "up" },
+          { at: 35,   nama: "Obesitas kelas I", rentang: "30,0 – 34,9", token: "--z-obes", ink: "--z-obes", icon: "up" },
+          { at: Infinity, nama: "Obesitas kelas II–III", rentang: "≥ 35,0", token: "--z-obes", ink: "--z-obes", icon: "up" }
+        ],
+        normal: 1
+      };
+    }
+    if (key === "kemenkes") {
+      return {
+        key: "kemenkes",
+        judul: "Klasifikasi Kemenkes Asia-Pasifik",
+        sumber: "Normal 18,5–22,9 — lebih ketat dari WHO global, karena risiko metabolik pada populasi Asia muncul di BMI lebih rendah. Dipakai untuk penilaian kesehatan, bukan untuk seleksi.",
+        kolom: "Rentang BMI (Kemenkes)",
+        cuts: [18.5, 23, 25],
+        split: { band: 3, at: 30 },
+        zlabels: ["Kurus", "Normal", "Lebih", "Obesitas I & II"],
+        kat: [
+          { at: 18.5, nama: "Kurus", rentang: "< 18,5", token: "--z-kurus", ink: "--z-kurus", icon: "down" },
+          { at: 23,   nama: "Normal", rentang: "18,5 – 22,9", token: "--z-normal", ink: "--z-normal-ink", icon: "check" },
+          { at: 25,   nama: "Berat badan berlebih", rentang: "23,0 – 24,9", token: "--z-lebih", ink: "--z-lebih-ink", icon: "up" },
+          { at: 30,   nama: "Obesitas I", rentang: "25,0 – 29,9", token: "--z-obes", ink: "--z-obes", icon: "up" },
+          { at: Infinity, nama: "Obesitas II", rentang: "≥ 30,0", token: "--z-obes", ink: "--z-obes", icon: "up" }
+        ],
+        normal: 1
+      };
+    }
+    var u = clamp(state.usia, 15, 18);
+    var r = WHO[state.sex][u];
+    var jk = state.sex === "w" ? "perempuan" : "laki-laki";
+    return {
+      key: "imtu",
+      judul: "IMT/U — usia " + u + " tahun, " + jk,
+      sumber: "Di bawah 19 tahun, status gizi dibaca menurut umur dan jenis kelamin memakai kurva WHO 2007 dengan kategori Permenkes No. 2/2020. Ambangnya naik tiap tahun. Ini standar kesehatan anak, bukan yang dipakai pemeriksaan kesehatan kerja.",
+      kolom: "Rentang BMI (usia " + u + ")",
+      cuts: [r.m2, r.p1, r.p2],
+      split: { band: 0, at: r.m3 },
+      zlabels: ["Gizi kurang", "Gizi baik", "Gizi lebih", "Obesitas"],
+      kat: [
+        { at: r.m3, nama: "Gizi buruk", rentang: "< " + fmt(r.m3), token: "--z-kurus", ink: "--z-kurus", icon: "down" },
+        { at: r.m2, nama: "Gizi kurang", rentang: fmt(r.m3) + " – " + fmt(r.m2 - 0.05), token: "--z-kurus", ink: "--z-kurus", icon: "down" },
+        { at: r.p1, nama: "Gizi baik", rentang: fmt(r.m2) + " – " + fmt(r.p1 - 0.05), token: "--z-normal", ink: "--z-normal-ink", icon: "check" },
+        { at: r.p2, nama: "Gizi lebih", rentang: fmt(r.p1) + " – " + fmt(r.p2 - 0.05), token: "--z-lebih", ink: "--z-lebih-ink", icon: "up" },
+        { at: Infinity, nama: "Obesitas", rentang: "≥ " + fmt(r.p2), token: "--z-obes", ink: "--z-obes", icon: "up" }
+      ],
+      normal: 2
+    };
+  }
+
+  function imtuBerlaku() { return state.usia <= 18; }
+
+  function standar() {
+    var key = state.std;
+    if (key === "imtu" && !imtuBerlaku()) { key = "who"; }
+    return stdDef(key);
+  }
+
+  function renderReads(bmi) {
+    var m = state.t / 100;
+    var html = "";
+    ["who", "kemenkes", "imtu"].forEach(function (key) {
+      if (key === "imtu" && !imtuBerlaku()) {
+        html += '<div class="read off"><span class="rh">' + STD_NAMA.imtu + "</span>" +
+          '<span class="rk">Tidak berlaku</span>' +
+          '<span class="rr">Hanya untuk usia 5–18 tahun.</span></div>';
+        return;
+      }
+      var s = stdDef(key);
+      var k = katOf(s, bmi);
+      var lo = s.cuts[0] * m * m;
+      var hi = (s.cuts[1] - 0.05) * m * m;
+      var aktif = key === standar().key;
+      html += '<div class="read' + (aktif ? " on" : "") + '">' +
+        '<span class="rh">' + STD_NAMA[key] + (aktif ? " · dipakai" : "") + "</span>" +
+        '<span class="rk" style="color:var(' + k.ink + ')">' + ICONS[k.icon] + k.nama + "</span>" +
+        '<span class="rr">zona ' + s.zlabels[1].toLowerCase() + " " + fmt(lo) + "–" + fmt(hi) + " kg</span></div>";
+    });
+    $("out-reads").innerHTML = html;
+  }
+
+  function katOf(std, bmi) {
+    for (var i = 0; i < std.kat.length; i++) {
+      if (bmi < std.kat[i].at) { return std.kat[i]; }
+    }
+    return std.kat[std.kat.length - 1];
+  }
+
+  // ---------- gauge ----------
+  function renderGauge(std, bmi) {
+    var edges = [SCALE_MIN, std.cuts[0], std.cuts[1], std.cuts[2], SCALE_MAX];
+    var tokens = ["--z-kurus", "--z-normal", "--z-lebih", "--z-obes"];
+    var html = "";
+    for (var i = 0; i < 4; i++) {
+      var w = ((edges[i + 1] - edges[i]) / (SCALE_MAX - SCALE_MIN)) * 100;
+      var inner = "";
+      if (std.split.band === i && std.split.at > edges[i] && std.split.at < edges[i + 1]) {
+        var p = ((std.split.at - edges[i]) / (edges[i + 1] - edges[i])) * 100;
+        inner = '<span class="split" style="left:' + p.toFixed(2) + '%"></span>';
+      }
+      html += '<div class="band" style="width:' + w.toFixed(2) + "%;background:var(" + tokens[i] + ')">' + inner + "</div>";
+    }
+    $("bands").innerHTML = html;
+
+    // label zona, lebarnya mengikuti band
+    var zhtml = "";
+    for (var j = 0; j < 4; j++) {
+      var zw = ((edges[j + 1] - edges[j]) / (SCALE_MAX - SCALE_MIN)) * 100;
+      zhtml += '<span class="zl" style="width:' + zw.toFixed(2) + '%">' + std.zlabels[j] + "</span>";
+    }
+    $("zonelabels").innerHTML = zhtml;
+
+    // tick: buang label yang terlalu rapat supaya tidak bertumpuk
+    var cand = [std.cuts[0], std.cuts[1], std.cuts[2]];
+    if (std.split.at > SCALE_MIN && std.split.at < SCALE_MAX) { cand.push(std.split.at); }
+    cand.sort(function (a, b) { return a - b; });
+    var kept = [];
+    var lastP = 0;
+    cand.forEach(function (v) {
+      var p = pos(v);
+      if (p - lastP >= 6 && 100 - p >= 6) { kept.push(v); lastP = p; }
+    });
+    var th = '<span class="tick start">' + fmt(SCALE_MIN, 0) + "</span>";
+    kept.forEach(function (v) {
+      th += '<span class="tick mid" style="left:' + pos(v).toFixed(2) + '%">' + fmt(v) + "</span>";
+    });
+    th += '<span class="tick end">' + fmt(SCALE_MAX, 0) + "</span>";
+    $("ticks").innerHTML = th;
+
+    var p2 = pos(bmi);
+    $("needle").style.left = p2 + "%";
+    $("needle-val").textContent = (bmi < SCALE_MIN ? "≤ " : bmi > SCALE_MAX ? "≥ " : "") + fmt(bmi);
+    $("bands").setAttribute("aria-label",
+      "Skala BMI " + fmt(SCALE_MIN, 0) + " sampai " + fmt(SCALE_MAX, 0) + ". " +
+      std.zlabels[0] + " di bawah " + fmt(std.cuts[0]) + "; " +
+      std.zlabels[1] + " " + fmt(std.cuts[0]) + " sampai " + fmt(std.cuts[1] - 0.05) + "; " +
+      std.zlabels[2] + " " + fmt(std.cuts[1]) + " sampai " + fmt(std.cuts[2] - 0.05) + "; " +
+      std.zlabels[3] + " " + fmt(std.cuts[2]) + " ke atas.");
+  }
+
+  // ---------- rencana ----------
+  function hariKe(tglStr) {
+    var now = new Date();
+    now.setHours(0, 0, 0, 0);
+    var d = new Date(tglStr + "T00:00:00");
+    if (isNaN(d.getTime())) { return null; }
+    return Math.round((d - now) / 86400000);
+  }
+
+  function renderPlan(std, lo, hi) {
+    var b = state.b;
+    var hari = hariKe(state.tgl);
+    var arah = b > hi ? "turun" : (b < lo ? "naik" : "jaga");
+    var selisih = arah === "turun" ? b - hi : (arah === "naik" ? lo - b : 0);
+
+    var chip = $("plan-chip");
+    var ico = $("plan-ico");
+    var stx = $("plan-status");
+    var warn = $("plan-warn");
+    var steps;
+
+    // sasaran & waktu
+    if (arah === "jaga") {
+      $("plan-target").innerHTML = fmt(lo) + " – " + fmt(hi) + " kg<small>Kamu sudah di dalam rentang ini. Sasarannya bertahan, bukan berubah.</small>";
+    } else if (arah === "turun") {
+      $("plan-target").innerHTML = "≤ " + fmt(hi) + " kg<small>Batas atas zona " + std.zlabels[1].toLowerCase() + " pada tinggi " + cm(state.t) + " cm.</small>";
+    } else {
+      $("plan-target").innerHTML = "≥ " + fmt(lo) + " kg<small>Batas bawah zona " + std.zlabels[1].toLowerCase() + " pada tinggi " + cm(state.t) + " cm.</small>";
+    }
+
+    if (hari === null) {
+      $("plan-waktu").innerHTML = "—<small>Isi tanggal tes untuk menghitung.</small>";
+    } else if (hari < 0) {
+      $("plan-waktu").innerHTML = (-hari) + " hari lalu<small>Tanggal yang kamu isi sudah lewat. Perbarui dengan tanggal tes berikutnya.</small>";
+    } else if (hari === 0) {
+      $("plan-waktu").innerHTML = "Hari ini<small>Tidak ada lagi waktu untuk mengubah berat badan. Fokus ke tidur, cairan, dan dokumen.</small>";
+    } else {
+      $("plan-waktu").innerHTML = hari + " hari<small>Sekitar " + fmt(hari / 7) + " pekan sampai tanggal tes yang kamu isi.</small>";
+    }
+
+    var laju = (hari && hari > 0 && selisih > 0) ? selisih / (hari / 7) : null;
+    if (arah === "jaga") {
+      $("plan-laju").innerHTML = "0 kg/pekan<small>Tidak ada yang perlu dikejar.</small>";
+    } else if (laju === null) {
+      $("plan-laju").innerHTML = "—<small>Perlu tanggal tes yang valid di masa depan.</small>";
+    } else {
+      $("plan-laju").innerHTML = fmt(laju) + " kg/pekan<small>Selisih " + fmt(selisih) + " kg dibagi waktu yang tersisa. Laju aman maksimal 0,5 kg per pekan.</small>";
+    }
+
+    // status + langkah
+    warn.hidden = true;
+    if (arah === "jaga") {
+      $("plan-h").textContent = "Pertahankan sampai hari tes";
+      chip.style.color = "var(--z-normal-ink)";
+      ico.innerHTML = ICONS.check;
+      stx.textContent = "Sudah di sasaran";
+      steps = [
+        "Teruskan pola makan dan latihan yang sekarang. Tidak perlu diubah hanya karena akan ada tes.",
+        "Jangan turunkan lagi &ldquo;supaya lebih aman&rdquo;. Turun di bawah batas bawah justru memindahkan kamu ke kategori " + (std.key === "imtu" ? "gizi kurang" : "kurus") + ".",
+        "Jaga tidur 7–8 jam dan minum cukup. Tekanan darah dan hasil lab lebih sering jadi masalah di rikkes daripada berat badan.",
+        "Timbang sekali sepekan, pagi, sebelum makan, supaya tahu kalau mulai keluar dari rentang."
+      ];
+    } else if (arah === "turun") {
+      $("plan-h").textContent = "Perlu turun " + fmt(selisih) + " kg";
+      if (laju === null || laju <= 0.5) {
+        chip.style.color = "var(--z-normal-ink)";
+        ico.innerHTML = ICONS.check;
+        stx.textContent = "Realistis";
+      } else if (laju <= 1) {
+        chip.style.color = "var(--z-lebih-ink)";
+        ico.innerHTML = ICONS.info;
+        stx.textContent = "Ketat";
+      } else {
+        chip.style.color = "var(--z-obes)";
+        ico.innerHTML = ICONS.x;
+        stx.textContent = "Tidak realistis";
+      }
+      steps = [
+        "Kurangi sekitar 500 kkal per hari dari kebutuhanmu. Itulah yang menghasilkan ±0,5 kg per pekan. Lebih dalam dari itu mengorbankan massa otot dan tenaga untuk tes fisik.",
+        "Mulai dari minuman manis dan gorengan — biasanya sumber kalori terbesar yang paling mudah dihapus. Isi setengah piring dengan sayur, seperempat protein, seperempat karbohidrat.",
+        "Jalan cepat atau lari 150 menit sepekan dibagi 4–5 sesi, plus 2 sesi latihan kekuatan. Ini sekaligus menyiapkan kebugaran untuk tahap setelahnya.",
+        "Tidur 7–8 jam. Kurang tidur menaikkan nafsu makan dan tekanan darah — dua hal yang diperiksa di hari yang sama.",
+        "Timbang sekali sepekan, pagi, sebelum makan. Timbangan harian hanya menampilkan naik-turun air dan bikin putus asa."
+      ];
+      warn.hidden = false;
+      warn.innerHTML = "<strong>Jangan tempuh jalan pintas sebelum rikkes.</strong> Puasa air, sauna, obat pelangsing, dan diuretik memang menurunkan angka timbangan dalam sehari, tapi semuanya mengacaukan tekanan darah serta hasil lab darah dan urine yang diperiksa di hari yang sama. Risiko gagalnya lebih besar daripada selisih beberapa kilogram — apalagi berat badan tidak punya ambang resmi di pengumuman KAI." +
+        (laju !== null && laju > 1
+          ? " <br><br><strong>Dengan sisa waktu ini, zona " + std.zlabels[1].toLowerCase() + " tidak bisa dicapai secara aman.</strong> Kejar yang masih mungkin: tekanan darah, gigi, dan kebugaran umum. Datang dengan kondisi terbaik yang bisa dicapai, bukan dengan tubuh yang baru dikuras."
+          : "");
+    } else {
+      $("plan-h").textContent = "Perlu naik " + fmt(selisih) + " kg";
+      if (laju === null || laju <= 0.5) {
+        chip.style.color = "var(--z-normal-ink)";
+        ico.innerHTML = ICONS.check;
+        stx.textContent = "Realistis";
+      } else if (laju <= 1) {
+        chip.style.color = "var(--z-lebih-ink)";
+        ico.innerHTML = ICONS.info;
+        stx.textContent = "Ketat";
+      } else {
+        chip.style.color = "var(--z-obes)";
+        ico.innerHTML = ICONS.x;
+        stx.textContent = "Tidak realistis";
+      }
+      steps = [
+        "Tambah sekitar 300–500 kkal per hari di atas kebutuhanmu. Naik lebih cepat dari 0,5 kg per pekan umumnya jadi lemak, bukan otot.",
+        "Naikkan frekuensi jadi 5–6 kali makan kecil. Tambahkan sumber padat kalori yang bergizi: telur, kacang, susu, alpukat, nasi dengan lauk berminyak sehat.",
+        "Protein sekitar 1,6 gram per kg berat badan supaya tambahannya menjadi otot.",
+        "Latihan kekuatan 3 kali sepekan. Tanpa ini, berat naik tapi postur dan kebugaran tidak ikut membaik.",
+        "Kalau berat tidak bergerak dalam 3 pekan padahal porsi sudah bertambah, periksa ke dokter — ada sebab medis yang perlu dicek, bukan sekadar porsi kurang."
+      ];
+    }
+
+    $("plan-steps").innerHTML = steps.map(function (s) { return "<li>" + s + "</li>"; }).join("");
+  }
+
+  // ---------- daftar statis ----------
+  function buildFormasiSelect() {
+    var sel = $("formasi");
+    sel.innerHTML = "";
+    FORMASI.forEach(function (g) {
+      var og = document.createElement("optgroup");
+      og.label = g.g;
+      g.items.forEach(function (it) {
+        var o = document.createElement("option");
+        o.value = it.id;
+        o.textContent = it.nama;
+        og.appendChild(o);
+      });
+      sel.appendChild(og);
+    });
+    sel.value = state.formasi;
+  }
+
+  function buildTables() {
+    var html = "";
+    FORMASI.forEach(function (g) {
+      g.items.forEach(function (it) {
+        html += "<tr><td>" + it.nama + '</td><td class="num">' + it.p + ' cm</td><td class="num">' + (it.w ? it.w + " cm" : "tidak dicantumkan") + "</td></tr>";
+      });
+    });
+    $("tbl-formasi").innerHTML = html;
+
+    var h2 = "";
+    LAIN.forEach(function (g) {
+      h2 += '<tr><td colspan="3" style="padding-top:14px;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;border-bottom:0">' + g.g + "</td></tr>";
+      g.items.forEach(function (r) {
+        h2 += "<tr><td>" + r[0] + '</td><td class="num">' + (r[1] ? r[1] + " cm" : "—") + '</td><td class="num">' + (r[2] ? r[2] + " cm" : "—") + "</td></tr>";
+      });
+    });
+    $("tbl-lain").innerHTML = h2;
+
+    var h3 = "";
+    [15, 16, 17, 18].forEach(function (u) {
+      ["p", "w"].forEach(function (sx) {
+        var r = WHO[sx][u];
+        h3 += "<tr><td>" + u + " tahun · " + (sx === "p" ? "laki-laki" : "perempuan") + "</td>" +
+          '<td class="num">' + fmt(r.m3) + '</td><td class="num">' + fmt(r.m2) + '</td>' +
+          '<td class="num">' + fmt(r.p1) + '</td><td class="num">' + fmt(r.p2) + "</td></tr>";
+      });
+    });
+    $("tbl-who").innerHTML = h3;
+  }
+
+  function buildChecks() {
+    var html = "";
+    CHECKS.forEach(function (c, i) {
+      var n = i + 1 < 10 ? "0" + (i + 1) : String(i + 1);
+      html += '<li><label><input type="checkbox" data-ck="' + c.id + '"' + (state.ck[c.id] ? " checked" : "") + ">" +
+        '<span class="ck-body">' +
+          '<span class="ck-h"><em>' + n + "</em>" + c.nama + "</span>" +
+          '<span class="ck-what">' + c.what + "</span>" +
+          '<span class="ck-prep"><b>Persiapan:</b> ' + c.prep + "</span>" +
+        "</span></label></li>";
+    });
+    $("ck-list").innerHTML = html;
+
+    var boxes = $("ck-list").querySelectorAll("input[data-ck]");
+    Array.prototype.forEach.call(boxes, function (box) {
+      box.addEventListener("change", function () {
+        state.ck[box.getAttribute("data-ck")] = box.checked;
+        renderChecks();
+        save();
+      });
+    });
+  }
+
+  function renderChecks() {
+    var done = CHECKS.filter(function (c) { return state.ck[c.id]; }).length;
+    $("ck-count").textContent = done + "/" + CHECKS.length;
+    $("ck-bar").style.width = Math.round((done / CHECKS.length) * 100) + "%";
+    $("ck-cap").textContent = done === CHECKS.length
+      ? "Sepuluh komponen sudah kamu tandai siap. Tersimpan di browser ini."
+      : "Centang yang sudah kamu siapkan atau periksa sendiri. Tersimpan di browser ini.";
+  }
+
+  function buildTimeline() {
+    var now = new Date();
+    now.setHours(0, 0, 0, 0);
+    var html = "";
+    var adaAktif = false;
+    TAHAP.forEach(function (t) {
+      var cls = "", tag = "";
+      var end = t.end ? new Date(t.end + "T23:59:59") : null;
+      var start = t.start ? new Date(t.start + "T00:00:00") : null;
+      if (end && now > end) {
+        cls = "done";
+        tag = '<span class="tag" style="color:var(--muted)">' + ICONS.check + " Selesai</span>";
+      } else if (start && end && now >= start && now <= end) {
+        cls = "now"; adaAktif = true;
+        tag = '<span class="tag" style="color:var(--accent)">' + ICONS.info + " Sedang berjalan</span>";
+      } else if (!adaAktif && start && now < start) {
+        cls = "now"; adaAktif = true;
+        tag = '<span class="tag" style="color:var(--accent)">' + ICONS.info + " Tahap berikutnya</span>";
+      }
+      html += '<li class="' + cls + '"><span class="st">' + t.nama + '</span><span class="dt">' + t.label + "</span>" + tag + "</li>";
+    });
+    $("tl-list").innerHTML = html;
+
+    var kStart = new Date(TAHAP[3].start + "T00:00:00");
+    var kEnd = new Date(TAHAP[3].end + "T23:59:59");
+    var h = $("banner-h"), bb = $("banner-b");
+    if (now < kStart) {
+      h.textContent = "Seleksi kesehatan awal diperkirakan mulai " + Math.ceil((kStart - now) / 86400000) + " hari lagi";
+      bb.textContent = "Estimasi 2 – 17 Oktober 2026. Komponen yang masih bisa kamu perbaiki tinggal antropometri, tekanan darah, dan gigi.";
+    } else if (now <= kEnd) {
+      h.textContent = "Seleksi kesehatan awal sedang berjalan";
+      bb.textContent = "Estimasi berakhir 17 Oktober 2026, dijadwalkan per Daop sehingga tanggal tiap pelamar berbeda. Psikotes menyusul sekitar 25 – 27 Oktober.";
+    } else {
+      h.textContent = "Tahap berikutnya: seleksi psikologi";
+      bb.textContent = "Estimasi 25 – 27 Oktober 2026. Jendela kesehatan awal sudah lewat.";
+    }
+  }
+
+  function renderKlasTable(std, aktif) {
+    var m = state.t / 100;
+    var prev = null;
+    var rows = "";
+    std.kat.forEach(function (k) {
+      var berat;
+      if (prev === null) {
+        berat = "< " + fmt(k.at * m * m) + " kg";
+      } else if (k.at === Infinity) {
+        berat = "≥ " + fmt(prev * m * m) + " kg";
+      } else {
+        berat = fmt(prev * m * m) + " – " + fmt((k.at - 0.05) * m * m) + " kg";
+      }
+      rows += '<tr' + (k.nama === aktif.nama ? ' class="active"' : "") + ">" +
+        '<td><span class="zcell"><span class="dot" style="background:var(' + k.token + ')"></span>' + k.nama + "</span></td>" +
+        '<td class="num">' + k.rentang + "</td>" +
+        '<td class="num">' + berat + "</td></tr>";
+      prev = k.at;
+    });
+    $("tbl-klas").innerHTML = rows;
+    $("th-rentang").textContent = std.kolom;
+    $("klas-note").textContent = std.sumber;
+  }
+
+  function render() {
+    var std = standar();
+    var m = state.t / 100;
+    var bmi = state.b / (m * m);
+    var kat = katOf(std, bmi);
+    var tTxt = cm(state.t);
+
+    $("out-bmi").textContent = fmt(bmi);
+    $("out-bmi").style.color = "var(" + kat.ink + ")";
+    $("out-kat").textContent = kat.nama;
+    $("out-ico").innerHTML = ICONS[kat.icon];
+    $("out-chip").style.color = "var(" + kat.ink + ")";
+    $("out-std").innerHTML = "<b>" + std.judul + ".</b> " + std.sumber +
+      (state.std === "imtu" && !imtuBerlaku() ? " <b>IMT/U tidak berlaku di usia " + state.usia + " tahun, jadi halaman memakai ambang WHO dewasa.</b>" : "");
+
+    renderReads(bmi);
+    renderGauge(std, bmi);
+
+    var lo = std.cuts[0] * m * m;
+    var hi = (std.cuts[1] - 0.05) * m * m;
+    $("out-ideal").innerHTML = fmt(lo) + " – " + fmt(hi) + " kg<small>Berat yang membuat BMI jatuh di zona " + std.zlabels[1].toLowerCase() + " pada tinggi " + tTxt + " cm.</small>";
+
+    var selisih, selKet;
+    if (state.b < lo) {
+      selisih = "+" + fmt(lo - state.b) + " kg";
+      selKet = "Perlu naik sebanyak ini untuk masuk zona " + std.zlabels[1].toLowerCase() + ".";
+    } else if (state.b > hi) {
+      selisih = "−" + fmt(state.b - hi) + " kg";
+      selKet = "Perlu turun sebanyak ini untuk masuk zona " + std.zlabels[1].toLowerCase() + ".";
+    } else {
+      selisih = "0 kg";
+      selKet = "Sudah di dalam zona " + std.zlabels[1].toLowerCase() + ".";
+    }
+    $("out-selisih").innerHTML = selisih + "<small>" + selKet + "</small>";
+
+    // ---- syarat formasi ----
+    var it = ALL[state.formasi] || ALL[DEF_FORMASI];
+    var min = state.sex === "w" ? it.w : it.p;
+    var label = state.sex === "w" ? "wanita" : "pria";
+    $("out-formasi").textContent = "KAI — " + it.nama;
+
+    var tchip = $("out-tchip"), tico = $("out-tico"), tstatus = $("out-tstatus");
+    if (min === null || min === undefined) {
+      tchip.style.color = "var(--ink-2)";
+      tico.innerHTML = ICONS.info;
+      tstatus.textContent = "Tidak dicantumkan";
+      $("out-tmeasure").innerHTML = "Pengumuman resmi tidak mencantumkan tinggi minimal " + label + " untuk formasi ini. Tinggi kamu <b>" + tTxt + " cm</b>.";
+      $("out-tinggi").innerHTML = tTxt + " cm<small>Tinggi minimal " + label + " tidak dicantumkan. Sebagai acuan, batas pria di formasi yang sama " + it.p + " cm.</small>";
+    } else if (state.t >= min) {
+      tchip.style.color = "var(--z-normal-ink)";
+      tico.innerHTML = ICONS.check;
+      tstatus.textContent = "Memenuhi";
+      $("out-tmeasure").innerHTML = "Tinggi minimal " + label + " <b>" + min + " cm</b> · tinggi kamu <b>" + tTxt + " cm</b> · lebih <b>" + cm(state.t - min) + " cm</b>";
+      $("out-tinggi").innerHTML = tTxt + " cm<small>Lebih " + cm(state.t - min) + " cm dari batas minimal " + min + " cm.</small>";
+    } else {
+      tchip.style.color = "var(--z-obes)";
+      tico.innerHTML = ICONS.x;
+      tstatus.textContent = "Kurang " + cm(min - state.t) + " cm";
+      $("out-tmeasure").innerHTML = "Tinggi minimal " + label + " <b>" + min + " cm</b> · tinggi kamu <b>" + tTxt + " cm</b> · kurang <b>" + cm(min - state.t) + " cm</b>";
+      $("out-tinggi").innerHTML = tTxt + " cm<small>Kurang " + cm(min - state.t) + " cm dari batas " + min + " cm. Tinggi badan tidak bisa diubah — pertimbangkan formasi dengan batas 160 cm.</small>";
+    }
+
+    var noteEl = $("out-tnote");
+    if (it.note) { noteEl.textContent = it.note; noteEl.hidden = false; } else { noteEl.hidden = true; }
+
+    renderPlan(std, lo, hi);
+    renderKlasTable(std, kat);
+    save();
+  }
+
+  // ---------- kontrol ----------
+  function syncPair(numId, rangeId, key) {
+    var num = $(numId), rng = $(rangeId);
+    num.addEventListener("input", function () {
+      var v = parseFloat(num.value);
+      if (!isFinite(v) || v <= 0) { return; }
+      state[key] = v;
+      rng.value = clamp(v, parseFloat(rng.min), parseFloat(rng.max));
+      render();
+    });
+    rng.addEventListener("input", function () {
+      state[key] = parseFloat(rng.value);
+      num.value = rng.value;
+      render();
+    });
+  }
+
+  load();
+
+  $("sex-" + state.sex).checked = true;
+  $("std-" + state.std).checked = true;
+  $("usia").value = state.usia;
+  $("tinggi").value = state.t;
+  $("tinggi-r").value = clamp(state.t, 130, 210);
+  $("berat").value = state.b;
+  $("berat-r").value = clamp(state.b, 35, 150);
+  $("tgl").value = state.tgl;
+
+  buildFormasiSelect();
+  buildTables();
+  buildChecks();
+  buildTimeline();
+
+  syncPair("tinggi", "tinggi-r", "t");
+  syncPair("berat", "berat-r", "b");
+  $("usia").addEventListener("input", function () {
+    var v = parseInt($("usia").value, 10);
+    if (!isFinite(v)) { return; }
+    state.usia = clamp(v, 15, 60);
+    render();
+  });
+  $("sex-p").addEventListener("change", function () { state.sex = "p"; render(); });
+  $("sex-w").addEventListener("change", function () { state.sex = "w"; render(); });
+  ["who", "kemenkes", "imtu"].forEach(function (k) {
+    $("std-" + k).addEventListener("change", function () { state.std = k; render(); });
+  });
+  $("formasi").addEventListener("change", function () { state.formasi = $("formasi").value; render(); });
+  $("tgl").addEventListener("change", function () { state.tgl = $("tgl").value || DEF_TGL; render(); });
+
+  renderChecks();
+  render();
+})();
+</script>
+
+</body></html>
